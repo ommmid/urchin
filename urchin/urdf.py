@@ -1054,10 +1054,13 @@ class Material(URDFType):
                 color.attrib["rgba"] = np.array2string(self.color)[1:-1]
                 node.append(color)
 
-        # For non-top-level elements just save the material with a name
         else:
             node = ET.Element("material")
             node.attrib["name"] = self.name
+            if self.color is not None:
+                color = ET.Element("color")
+                color.attrib["rgba"] = np.array2string(self.color)[1:-1]
+                node.append(color)
         return node
 
     def copy(self, prefix="", scale=None):
