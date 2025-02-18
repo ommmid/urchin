@@ -6,6 +6,8 @@ from lxml import etree as ET
 import numpy as np
 import trimesh
 
+from pathlib import Path
+
 
 def rpy_to_matrix(coords):
     """Convert roll-pitch-yaw coordinates to a 3x3 homogenous rotation matrix.
@@ -179,6 +181,28 @@ def unparse_origin(matrix):
     node.attrib['rpy'] = '{} {} {}'.format(*matrix_to_rpy(matrix[:3,:3]))
     return node
 
+def resolve_file_path(base_path, file_path):
+    """some file path in URDF may contain package:// like what is used in ROS. This function
+    finds that package and returns the absolute path
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the file wich may contain package://
+
+    Returns
+    -------
+    resolved : str
+        clean path without package://
+    """
+
+    rel_to_pkg = file_path[10:]
+    pkg_name = file_path[10:].split('/')[0]
+    x = base_path.find(pkg_name)
+    parent = base_path[:x]
+    resolved = parent + rel_to_pkg
+    return resolved
+
 
 def get_filename(base_path, file_path, makedirs=False):
     """Formats a file path correctly for URDF loading.
@@ -201,7 +225,10 @@ def get_filename(base_path, file_path, makedirs=False):
     """
     fn = file_path
     if not os.path.isabs(file_path):
-        fn = os.path.join(base_path, file_path)
+        if file_path.startswith("package://"):
+            fn = resolve_file_path(base_path, file_path)
+        else:
+            fn = os.path.join(base_path, file_path)
     if makedirs:
         d, _ = os.path.split(fn)
         if not os.path.exists(d):

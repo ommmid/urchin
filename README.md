@@ -16,3 +16,8 @@ docs when it diverges enough to deserve it.
 
 The urdfpy docs can be found [here](https://urdfpy.readthedocs.io/en/latest/examples/index.html) for
 more information.
+
+
+## Dependencies
+
+works with `networkx 3.4.2` 
