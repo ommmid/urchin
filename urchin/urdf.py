@@ -2732,8 +2732,8 @@ class Link(URDFTypeWithMesh):
         cpy._collision_mesh = cm
         return cpy
 
-
-class URDF(URDFTypeWithMesh):
+from ._vis_mixin import Visualization
+class URDF(URDFTypeWithMesh, Visualization):
     """The top-level URDF specification.
 
     The URDF encapsulates an articulated object, such as a robot or a gripper.
@@ -3684,52 +3684,6 @@ class URDF(URDFTypeWithMesh):
             v.render_lock.release()
 
             time.sleep(1.0 / fps)
-
-    def show(self, cfg=None, use_collision=False):
-        """Visualize the URDF in a given configuration.
-
-        Parameters
-        ----------
-        cfg : dict or (n), float
-            A map from joints or joint names to configuration values for
-            each joint, or a list containing a value for each actuated joint
-            in sorted order from the base link.
-            If not specified, all joints are assumed to be in their default
-            configurations.
-        use_collision : bool
-            If True, the collision geometry is visualized instead of
-            the visual geometry.
-        """
-        import pyribbit  # Save pyribbit import for here for CI
-
-        if use_collision:
-            fk = self.collision_trimesh_fk(cfg=cfg)
-        else:
-            fk = self.visual_trimesh_fk(cfg=cfg)
-
-        scene = pyribbit.Scene()
-        for tm in fk:
-            pose = fk[tm]
-            mesh = pyribbit.Mesh.from_trimesh(tm, smooth=False)
-            scene.add(mesh, pose=pose)
-        pyribbit.Viewer(scene, use_raymond_lighting=True)
-
-    def show_trimesh(self, cfg=None, extra=None):
-        '''extra: is the extra types to visualize, could be axis, point cloud ....'''
-        fk = self.visual_trimesh_fk(cfg=cfg)
-        meshes = []
-        for tm in fk:
-            pose = fk[tm]
-            tm.apply_transform(pose)
-            meshes.append(tm)
-        meshes.extend(extra)
-
-        axis = trimesh.creation.axis()
-        scene = trimesh.Scene([axis, extra, meshes])
-        scene.show()
-
-    def show_open3d(self, cfg=None, extra=None):
-        pass
 
     def copy(self, name=None, prefix="", scale=None, collision_only=False):
         """Make a deep copy of the URDF.
