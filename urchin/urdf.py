@@ -2775,6 +2775,7 @@ class URDF(URDFTypeWithMesh):
         transmissions=None,
         materials=None,
         other_xml=None,
+        skip_transmission=False
     ):
         if joints is None:
             joints = []
@@ -2826,7 +2827,8 @@ class URDF(URDFTypeWithMesh):
 
         # Validate the joints and transmissions
         actuated_joints = self._validate_joints()
-        self._validate_transmissions()
+        if not skip_transmission:
+            self._validate_transmissions()
 
         # Create the link graph and base link/end link sets
         self._G = nx.DiGraph()
@@ -3859,7 +3861,7 @@ class URDF(URDFTypeWithMesh):
                     self._material_map[v.material.name] = v.material
 
     @classmethod
-    def load(cls, file_obj, lazy_load_meshes=False):
+    def load(cls, file_obj, lazy_load_meshes=False, skip_transmission=False):
         """Load a URDF from a file.
 
         Parameters
@@ -3892,7 +3894,7 @@ class URDF(URDFTypeWithMesh):
             path, _ = os.path.split(file_obj.name)
 
         node = tree.getroot()
-        return cls._from_xml(node, path, lazy_load_meshes)
+        return cls._from_xml(node, path, lazy_load_meshes, skip_transmission)
 
     def _validate_joints(self):
         """Raise an exception of any joints are invalidly specified.
@@ -4100,7 +4102,7 @@ class URDF(URDFTypeWithMesh):
         return joint_cfg, n_cfgs
 
     @classmethod
-    def _from_xml(cls, node, path, lazy_load_meshes):
+    def _from_xml(cls, node, path, lazy_load_meshes, skip_transmission):
         valid_tags = set(["joint", "link", "transmission", "material"])
         kwargs = cls._parse(node, path, lazy_load_meshes)
 
@@ -4111,6 +4113,7 @@ class URDF(URDFTypeWithMesh):
 
         data = ET.tostring(extra_xml_node)
         kwargs["other_xml"] = data
+        kwargs["skip_transmission"] = skip_transmission
         return cls(**kwargs)
 
     def _to_xml(self, parent, path):
