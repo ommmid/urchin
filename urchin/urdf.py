@@ -3712,6 +3712,20 @@ class URDF(URDFTypeWithMesh):
             scene.add(mesh, pose=pose)
         pyribbit.Viewer(scene, use_raymond_lighting=True)
 
+    def show_trimesh(self, cfg=None, extra=None):
+        fk = self.visual_trimesh_fk(cfg=cfg)
+        meshes = []
+        for tm in fk:
+            pose = fk[tm]
+            tm.apply_transform(pose)
+            meshes.append(tm)
+        meshes.extend(extra)
+
+        axis = trimesh.creation.axis()
+        scene = trimesh.Scene([axis, extra, meshes])
+        scene.show()
+
+
     def copy(self, name=None, prefix="", scale=None, collision_only=False):
         """Make a deep copy of the URDF.
 
