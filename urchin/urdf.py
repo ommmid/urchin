@@ -3713,6 +3713,7 @@ class URDF(URDFTypeWithMesh):
         pyribbit.Viewer(scene, use_raymond_lighting=True)
 
     def show_trimesh(self, cfg=None, extra=None):
+        '''extra: is the extra types to visualize, could be axis, point cloud ....'''
         fk = self.visual_trimesh_fk(cfg=cfg)
         meshes = []
         for tm in fk:
@@ -3725,6 +3726,8 @@ class URDF(URDFTypeWithMesh):
         scene = trimesh.Scene([axis, extra, meshes])
         scene.show()
 
+    def show_open3d(self, cfg=None, extra=None):
+        pass
 
     def copy(self, name=None, prefix="", scale=None, collision_only=False):
         """Make a deep copy of the URDF.
