@@ -2732,8 +2732,8 @@ class Link(URDFTypeWithMesh):
         cpy._collision_mesh = cm
         return cpy
 
-
-class URDF(URDFTypeWithMesh):
+from ._mixin_voxel import PC2Voxel
+class URDF(URDFTypeWithMesh, PC2Voxel):
     """The top-level URDF specification.
 
     The URDF encapsulates an articulated object, such as a robot or a gripper.
@@ -3714,7 +3714,7 @@ class URDF(URDFTypeWithMesh):
             scene.add(mesh, pose=pose)
         pyribbit.Viewer(scene, use_raymond_lighting=True)
 
-    def show_trimesh(self, cfg=None, extra=None):
+    def show_trimesh(self, cfg=None, extra=None, axis_radius = 0.01, axis_length=0.5):
         '''extra: is the extra types to visualize, could be axis, point cloud ....'''
         fk = self.visual_trimesh_fk(cfg=cfg)
         meshes = []
@@ -3724,8 +3724,10 @@ class URDF(URDFTypeWithMesh):
             meshes.append(tm)
         meshes.extend(extra)
 
-        axis = trimesh.creation.axis()
-        scene = trimesh.Scene([axis, extra, meshes])
+        axis = trimesh.creation.axis(axis_radius=axis_radius, axis_length=axis_length)
+        meshes.append(axis)
+        
+        scene = trimesh.Scene(meshes)
         scene.show()
 
     def show_open3d(self, cfg=None, extra=None):
